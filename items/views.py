@@ -15,7 +15,7 @@ def detail_item(request, pk):
             "id": response.id,
             "title": response.title,
             "description": response.description,
-            "image": response.image,
+            "image": str(response.image),
             "weight": response.weight,
             "price": response.price,
             "size": response.size,

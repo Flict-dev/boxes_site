@@ -6,7 +6,6 @@ import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -21,8 +20,11 @@ class Migration(migrations.Migration):
                 ('text', models.TextField(max_length=2000, verbose_name='текст отзыва')),
                 ('created_at', models.DateField(auto_now=True, verbose_name='Дата создания')),
                 ('published_at', models.DateField(verbose_name='Дата публикации')),
-                ('status', models.CharField(choices=[('new', 'на модерации'), ('published', 'опубликован'), ('hidden', 'отклонен')], default='new', max_length=30)),
-                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='review_author', to=settings.AUTH_USER_MODEL, verbose_name='автор')),
+                ('status', models.CharField(
+                    choices=[('new', 'на модерации'), ('published', 'опубликован'), ('hidden', 'отклонен')],
+                    default='new', max_length=30)),
+                ('author', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='review_author',
+                                             to=settings.AUTH_USER_MODEL, verbose_name='автор')),
             ],
             options={
                 'verbose_name': 'Отзыв',
