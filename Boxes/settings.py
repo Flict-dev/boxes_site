@@ -19,9 +19,10 @@ INSTALLED_APPS = [
     'django_extensions',
     'debug_toolbar',
     'rest_framework',
+    'reviews',
+    'carts',
     'users',
     'items',
-    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +77,11 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 4,
+}
 
 LANGUAGE_CODE = 'en-us'
 

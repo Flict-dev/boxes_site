@@ -3,12 +3,17 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+api_patterns = [
+    path('', include('items.urls')),
+    path('', include('users.urls')),
+    path('', include('reviews.urls')),
+    path('', include('carts.urls')),
+]
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api-auth/', include('rest_framework.urls')),
-    path('api/v1/', include('items.urls')),
-    path('api/v1/', include('users.urls')),
-    path('api/v1/', include('reviews.urls')),
+    path('api/v1/', include(api_patterns)),
 ]
 if settings.DEBUG:
     import debug_toolbar
