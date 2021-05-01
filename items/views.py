@@ -1,3 +1,4 @@
+from rest_framework.filters import OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import ReadOnlyModelViewSet
 from items.models import Item
@@ -14,3 +15,5 @@ class ItemViewSet(ReadOnlyModelViewSet):
     queryset = Item.objects.all()
     serializer_class = ItemSerializer
     pagination_class = ItemPageNumberPagination
+    filter_backends = [OrderingFilter]
+    ordering = ['weight', 'price']

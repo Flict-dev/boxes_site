@@ -3,11 +3,14 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
+from Boxes.utils import schema_view
+
 api_patterns = [
     path('', include('items.urls')),
     path('', include('users.urls')),
     path('', include('reviews.urls')),
     path('', include('carts.urls')),
+    path('docs/', schema_view.with_ui('swagger', cache_timeout=0))
 ]
 
 urlpatterns = [

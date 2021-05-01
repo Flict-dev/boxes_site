@@ -1,5 +1,6 @@
 from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from django.core.exceptions import ObjectDoesNotExist
@@ -28,41 +29,44 @@ class CartViewSet(ViewSet):
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
 
-    # def create(self, request):
-
 
 class CartItemViewSet(viewsets.GenericViewSet):
     serializer_class = CartItemSerializer
-# Добавить permission_classes, разобраться с users.
+    permission_classes = [IsAuthenticated]
 
-    def retrieve(self, request, pk=None):
-        if request.user.is_authenticated:
-            try:
-                cart_item = CartItem.objects.get(id=pk)
-                serializer = CartSerializer(cart_item)
-                return Response(serializer.data)
-            except ObjectDoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+    def recount_cart(self):
+        cart = Cart.objects.get(user=self.request.user)
+        recount_cart(cart)
+
+    def get_obj(self, pk):
+        try:
+            obj = CartItem.objects.get(id=pk)
+            return obj
+        except ObjectDoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def get_queryset(self):
         cart = get_object_or_404(Cart, user=self.request.user)
         queryset = CartItem.objects.filter(cart=cart)
         return queryset
 
+    def retrieve(self, request, pk=None):
+        try:
+            obj = CartItem.objects.get(id=pk)
+            serializer = CartItemSerializer(obj)
+            return Response(serializer.data)
+        except ObjectDoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
     def list(self, request):
-        if request.user.is_authenticated:
-            try:
-                cart = Cart.objects.get(user=request.user)
-                queryset = CartItem.objects.filter(cart=cart)
-                objects = self.paginate_queryset(queryset)
-                serializer = CartItemSerializer(objects, many=True)
-                return self.get_paginated_response(serializer.data)
-            except ObjectDoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            cart = Cart.objects.get(user=request.user)
+            queryset = CartItem.objects.filter(cart=cart)
+            objects = self.paginate_queryset(queryset)
+            serializer = CartItemSerializer(objects, many=True)
+            return self.get_paginated_response(serializer.data)
+        except ObjectDoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
         cart_item = CartItemSerializer(data=request.data)
@@ -75,55 +79,36 @@ class CartItemViewSet(viewsets.GenericViewSet):
                     cart=cart
                 )
                 cart.items.add(new_cart_item)
-                recount_cart(cart)
+                self.recount_cart()
                 serializer = CartItemSerializer(new_cart_item)
                 return Response(serializer.data)
             except ObjectDoesNotExist:
-                return Response(status=status.HTTP_401_UNAUTHORIZED)
+                return Response(status=status.HTTP_404_NOT_FOUND)
         else:
             return Response(cart_item.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk):
-        if request.user.is_authenticated:
-            serializer = CartItemSerializer(data=request.data)
-            if serializer.is_valid():
-                print(serializer.data)
-                try:
-                    cart = get_object_or_404(Cart, user=request.user)
-                    cart_item = CartItem.objects.get(id=pk)
-                    cart_item.delete()  # Здесь происходит момент замены - удаляем и создаем новый объект
-                    cart_item = CartItem.objects.create(
-                        item_id=serializer.data['item'],
-                        quantity=serializer.data['quantity'],
-                        cart=cart
-                    )
-                    response = CartItemSerializer(cart_item)
-                    return Response(response.data, status=status.HTTP_200_OK)
-                except ObjectDoesNotExist:
-                    return Response(status=status.HTTP_404_NOT_FOUND)
-            else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+        obj = self.get_obj(pk)
+        serializer = CartItemSerializer(obj, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            self.recount_cart()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def partial_update(self, request, pk):
-        if request.user.is_authenticated:
-            serializer = CartItemSerializer(data=request.data, partial=True)
-            if serializer.is_valid():
-                cart_item = CartItem.objects.get(id=pk)
-                cart_item.quantity = serializer.data['quantity']
-                cart_item.save()
-                response = CartItemSerializer(cart_item)
-                return Response(response.data, status=status.HTTP_200_OK)
-            else:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
+        obj = self.get_obj(pk)
+        serializer = CartItemSerializer(obj, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            self.recount_cart()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
     def destroy(self, request, pk):
-        if request.user.is_authenticated:
-            cart_item = get_object_or_404(CartItem, pk)
-            cart_item.delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        obj = self.get_obj(pk)
+        obj.delete()
+        self.recount_cart()
+        return Response(status=status.HTTP_204_NO_CONTENT)
