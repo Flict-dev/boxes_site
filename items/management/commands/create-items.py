@@ -1,10 +1,15 @@
-from django.core.exceptions import ValidationError
 from django.core.management import BaseCommand
 
 from items.models import Item
-from reviews.models import Reviews
-from users.models import User
 import requests
+
+
+def download_image(url, name):
+    response = requests.get(url)
+    out = open(f"media/items/{name}.jpg", "wb")
+    out.write(response.content)
+    out.close()
+    return f'items/{name}.jpg'
 
 
 class Command(BaseCommand):
@@ -16,10 +21,11 @@ class Command(BaseCommand):
             json_data_items = response_item.json()
             for item in json_data_items:
                 title = item['title']
+                img_url = item['image']
                 Item.objects.update_or_create(
                     title=item['title'],
                     description=item['description'],
-                    image=item['image'],
+                    image=download_image(img_url, title),
                     weight=item['weight_grams'],
                     size=item['size'],
                     price=item['price']

@@ -8,8 +8,7 @@ from users.serializers import UserSerializer
 
 class RegisterAPIView(APIView):
     def post(self, request, *args, **kwargs):
-        user = request.user
-        serializer = UserSerializer(user, data=request.data)
+        serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
