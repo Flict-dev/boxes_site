@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     'corsheaders',
     'debug_toolbar',
     'rest_framework',
-    'djoser',
     'reviews',
     'carts',
     'users',

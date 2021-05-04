@@ -5,8 +5,8 @@ from .models import Cart, CartItem
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'price', 'quantity', 'in_order')
-    list_filter = ('user', 'in_order')
+    list_display = ('id', 'user')
+    list_filter = ('user',)
     raw_id_fields = ('items',)
 
 

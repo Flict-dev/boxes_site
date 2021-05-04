@@ -6,37 +6,18 @@ from rest_framework.viewsets import ViewSet
 from django.core.exceptions import ObjectDoesNotExist
 from carts.models import Cart, CartItem
 from carts.serializers import CartSerializer, CartItemSerializer
-from carts.utils import recount_cart
-
-"""
-P.S. Я мог бы просто унаследоваться от классов, но так скучно и не понятно. Я просто хочу занть как это работает под капотом,
-поэтому и стал изобретать свой велоспиед. Мог бы посмотреть и показать, как правильно это делать? 
-И ещё, я знаю про функцию get_object_or_404, но люблю try except
-"""
 
 
 class CartViewSet(ViewSet):
     def retrieve(self, request, pk=None):
-        if request.user.is_authenticated:
-            try:
-                cart = Cart.objects.get(user=request.user)
-                serializer = CartSerializer(cart)
-                return Response(serializer.data)
-            except ObjectDoesNotExist:
-                cart = Cart.objects.create(user=request.user)
-                serializer = CartSerializer(cart)
-                return Response(serializer.data)
-        else:
-            return Response(status=status.HTTP_401_UNAUTHORIZED)
+        cart, param = Cart.objects.get_or_create(user=request.user, defaults={"user": request.user})
+        serializer = CartSerializer(cart)
+        return Response(serializer.data)
 
 
 class CartItemViewSet(viewsets.GenericViewSet):
     serializer_class = CartItemSerializer
     permission_classes = [IsAuthenticated]
-
-    def recount_cart(self):
-        cart = Cart.objects.get(user=self.request.user)
-        recount_cart(cart)
 
     def get_obj(self, pk):
         try:
@@ -73,15 +54,9 @@ class CartItemViewSet(viewsets.GenericViewSet):
         if cart_item.is_valid():
             try:
                 cart = Cart.objects.get(user=request.user)
-                new_cart_item = CartItem.objects.create(
-                    quantity=cart_item.data['quantity'],
-                    item_id=cart_item.data['item'],
-                    cart=cart
-                )
-                cart.items.add(new_cart_item)
-                self.recount_cart()
-                serializer = CartItemSerializer(new_cart_item)
-                return Response(serializer.data)
+                cart_item.save()
+                cart.items.add(cart_item.data['id'])
+                return Response(cart_item.data, status=status.HTTP_201_CREATED)
             except ObjectDoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
         else:
@@ -92,7 +67,6 @@ class CartItemViewSet(viewsets.GenericViewSet):
         serializer = CartItemSerializer(obj, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            self.recount_cart()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -102,7 +76,6 @@ class CartItemViewSet(viewsets.GenericViewSet):
         serializer = CartItemSerializer(obj, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            self.recount_cart()
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
@@ -110,5 +83,4 @@ class CartItemViewSet(viewsets.GenericViewSet):
     def destroy(self, request, pk):
         obj = self.get_obj(pk)
         obj.delete()
-        self.recount_cart()
         return Response(status=status.HTTP_204_NO_CONTENT)

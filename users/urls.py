@@ -7,12 +7,8 @@ from users.views import (
     CurrentUserViewSet,
 )
 
-users_patterns = [
+urlpatterns = [
     path('auth/login/', views.obtain_auth_token),
     path('auth/register/', RegisterAPIView.as_view()),
     path('current/', CurrentUserViewSet.as_view({'get': 'retrieve', 'put': 'update', 'patch': 'partial_update'}))
-]
-
-urlpatterns = [
-    path('users/', include(users_patterns))
 ]

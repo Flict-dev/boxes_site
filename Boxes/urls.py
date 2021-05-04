@@ -6,10 +6,10 @@ from django.urls import path, include
 from Boxes.utils import schema_view
 
 api_patterns = [
-    path('', include('items.urls')),
-    path('', include('users.urls')),
-    path('', include('reviews.urls')),
-    path('', include('carts.urls')),
+    path('items/', include('items.urls')),
+    path('users/', include('users.urls')),
+    path('reviews/', include('reviews.urls')),
+    path('carts/', include('carts.urls')),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0))
 ]
 
