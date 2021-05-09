@@ -1,3 +1,4 @@
+from django.http import Http404
 from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
@@ -6,11 +7,12 @@ from rest_framework.viewsets import ViewSet
 from django.core.exceptions import ObjectDoesNotExist
 from carts.models import Cart, CartItem
 from carts.serializers import CartSerializer, CartItemSerializer
+from items.serializers import ItemSerializer
 
 
 class CartViewSet(ViewSet):
     def retrieve(self, request, pk=None):
-        cart, param = Cart.objects.get_or_create(user=request.user, defaults={"user": request.user})
+        cart, param = Cart.objects.get_or_create(user=request.user, order__isnull=True, defaults={"user": request.user})
         serializer = CartSerializer(cart)
         return Response(serializer.data)
 
@@ -24,7 +26,7 @@ class CartItemViewSet(viewsets.GenericViewSet):
             obj = CartItem.objects.get(id=pk)
             return obj
         except ObjectDoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
+            raise Http404
 
     def get_queryset(self):
         cart = get_object_or_404(Cart, user=self.request.user)
@@ -35,7 +37,9 @@ class CartItemViewSet(viewsets.GenericViewSet):
         try:
             obj = CartItem.objects.get(id=pk)
             serializer = CartItemSerializer(obj)
-            return Response(serializer.data)
+            data = serializer.data
+            data['item'] = ItemSerializer(obj.item).data
+            return Response(data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -53,9 +57,16 @@ class CartItemViewSet(viewsets.GenericViewSet):
         cart_item = CartItemSerializer(data=request.data)
         if cart_item.is_valid():
             try:
-                cart = Cart.objects.get(user=request.user)
+                cart, param = Cart.objects.get_or_create(
+                    user=request.user,
+                    order__isnull=True,
+                    defaults={"user": request.user}
+                )
                 cart_item.save()
-                cart.items.add(cart_item.data['id'])
+                new_item = CartItem.objects.get(id=cart_item.data['id'])
+                cart.items.add(new_item)
+                new_item.cart = cart
+                new_item.save()
                 return Response(cart_item.data, status=status.HTTP_201_CREATED)
             except ObjectDoesNotExist:
                 return Response(status=status.HTTP_404_NOT_FOUND)
@@ -67,7 +78,9 @@ class CartItemViewSet(viewsets.GenericViewSet):
         serializer = CartItemSerializer(obj, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            data = serializer.data
+            data['item'] = ItemSerializer(obj.item).data
+            return Response(data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -75,8 +88,9 @@ class CartItemViewSet(viewsets.GenericViewSet):
         obj = self.get_obj(pk)
         serializer = CartItemSerializer(obj, data=request.data, partial=True)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            data = serializer.data
+            data['item'] = ItemSerializer(obj.item).data
+            return Response(data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 

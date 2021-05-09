@@ -7,7 +7,6 @@ from items.serializers import ItemSerializer
 
 class CartItemSerializer(ModelSerializer):
     total_price = serializers.SerializerMethodField('_get_total_price')
-    item = ItemSerializer()
 
     class Meta:
         model = CartItem

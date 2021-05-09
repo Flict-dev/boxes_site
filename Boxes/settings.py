@@ -22,14 +22,16 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework.authtoken',
     'django_extensions',
-    'drf_yasg',
+    'django_filters',
     'corsheaders',
     'debug_toolbar',
     'rest_framework',
+    'drf_yasg',
     'reviews',
     'carts',
     'users',
     'items',
+    'orders',
 ]
 
 MIDDLEWARE = [

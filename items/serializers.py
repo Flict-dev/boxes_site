@@ -6,4 +6,11 @@ from items.models import Item
 class ItemSerializer(ModelSerializer):
     class Meta:
         model = Item
-        fields = '__all__'
+        fields = (
+            'id',
+            'title',
+            'description',
+            'image',
+            'weight',
+            'price',
+        )

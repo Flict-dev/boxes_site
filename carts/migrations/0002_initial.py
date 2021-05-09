@@ -11,13 +11,17 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('reviews', '0001_initial'),
+        ('carts', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='reviews',
-            name='author',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='review_author', to=settings.AUTH_USER_MODEL, verbose_name='автор'),
+            model_name='cart',
+            name='user',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL, verbose_name='владелец'),
+        ),
+        migrations.AlterUniqueTogether(
+            name='cartitem',
+            unique_together={('item', 'cart')},
         ),
     ]
