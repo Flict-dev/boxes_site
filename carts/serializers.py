@@ -2,11 +2,14 @@ from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
 
 from carts.models import Cart, CartItem
+from items.models import Item
 from items.serializers import ItemSerializer
 
 
 class CartItemSerializer(ModelSerializer):
     total_price = serializers.SerializerMethodField('_get_total_price')
+    item = ItemSerializer(read_only=True)
+    item_id = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all())
 
     class Meta:
         model = CartItem
@@ -17,8 +20,8 @@ class CartItemSerializer(ModelSerializer):
 
     def create(self, validated_data):
         cart_item = CartItem(
-            item=validated_data['item'],
-            price=validated_data['item'].price,
+            item=validated_data['item_id'],
+            price=validated_data['item_id'].price,
             quantity=validated_data['quantity'],
         )
         cart_item.save()

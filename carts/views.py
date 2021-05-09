@@ -37,15 +37,13 @@ class CartItemViewSet(viewsets.GenericViewSet):
         try:
             obj = CartItem.objects.get(id=pk)
             serializer = CartItemSerializer(obj)
-            data = serializer.data
-            data['item'] = ItemSerializer(obj.item).data
-            return Response(data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def list(self, request):
         try:
-            cart = Cart.objects.get(user=request.user)
+            cart = Cart.objects.get(user=request.user, order__isnull=True)
             queryset = CartItem.objects.filter(cart=cart)
             objects = self.paginate_queryset(queryset)
             serializer = CartItemSerializer(objects, many=True)
@@ -78,9 +76,7 @@ class CartItemViewSet(viewsets.GenericViewSet):
         serializer = CartItemSerializer(obj, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            data = serializer.data
-            data['item'] = ItemSerializer(obj.item).data
-            return Response(data, status=status.HTTP_200_OK)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -88,9 +84,8 @@ class CartItemViewSet(viewsets.GenericViewSet):
         obj = self.get_obj(pk)
         serializer = CartItemSerializer(obj, data=request.data, partial=True)
         if serializer.is_valid():
-            data = serializer.data
-            data['item'] = ItemSerializer(obj.item).data
-            return Response(data, status=status.HTTP_200_OK)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
