@@ -40,16 +40,16 @@ class CartItemSerializer(ModelSerializer):
 
 
 class CartSerializer(ModelSerializer):
-    items = CartItemSerializer(many=True, read_only=True)
+    cart_items = CartItemSerializer(many=True, read_only=True)
     total_cost = serializers.SerializerMethodField('_get_total_cost')
 
     class Meta:
         model = Cart
-        fields = ('id', 'items', 'total_cost')
+        fields = ('id', 'cart_items', 'total_cost')
 
     def _get_total_cost(self, cart):
-        cart_items = CartItemSerializer(cart.items, many=True)
+        cart_items = CartItemSerializer(cart.cart_items, many=True)
         total_cost = 0
-        for item in range(cart.items.count()):
+        for item in range(cart.cart_items.count()):
             total_cost += cart_items.data[item]['total_price']
         return total_cost

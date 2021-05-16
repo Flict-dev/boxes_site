@@ -5,7 +5,7 @@ from users.models import User
 
 class CartItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name='продукт')
-    cart = models.ForeignKey('Cart', on_delete=models.CASCADE, verbose_name='корзина', related_name='item')
+    cart = models.ForeignKey('Cart', on_delete=models.CASCADE, verbose_name='корзина', related_name='cart_items')
     price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='цена')
     quantity = models.PositiveIntegerField(verbose_name='кол-во товаров')
 
