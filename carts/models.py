@@ -3,23 +3,10 @@ from items.models import Item
 from users.models import User
 
 
-class Cart(models.Model):
-    items = models.ManyToManyField('CartItem', verbose_name='продуткы', related_name='items')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='владелец')
-
-    class Meta:
-        verbose_name = 'корзина'
-        verbose_name_plural = 'корзины'
-
-    def __str__(self):
-        return f'Корзина пользователя - {self.user.username}'
-
-
 class CartItem(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, verbose_name='продукт')
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, verbose_name='корзина', blank=True, null=True,
-                             related_name='item')
-    price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='цена', blank=True, default=0)
+    cart = models.ForeignKey('Cart', on_delete=models.CASCADE, verbose_name='корзина', related_name='item')
+    price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='цена')
     quantity = models.PositiveIntegerField(verbose_name='кол-во товаров')
 
     class Meta:
@@ -29,3 +16,15 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f'cart item - {self.pk}'
+
+
+class Cart(models.Model):
+    items = models.ManyToManyField(Item, verbose_name='продуткы', related_name='cart_items', through=CartItem)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='владелец')
+
+    class Meta:
+        verbose_name = 'корзина'
+        verbose_name_plural = 'корзины'
+
+    def __str__(self):
+        return f'Корзина пользователя - {self.user.username} - {self.pk}'

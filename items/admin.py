@@ -12,5 +12,4 @@ class ItemAdmin(admin.ModelAdmin):
         'image',
         'weight',
         'price',
-        'size',
     )

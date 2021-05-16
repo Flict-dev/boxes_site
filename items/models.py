@@ -9,7 +9,6 @@ class Item(models.Model):
     image = models.ImageField(upload_to=ITEM_IMAGE_DIR, verbose_name='картинка')
     weight = models.PositiveIntegerField(verbose_name='вес в граммах')
     price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name='цена в рублях')
-    size = models.CharField(max_length=30, verbose_name='Размеры', blank=True)
 
     class Meta:
         verbose_name = 'Коробка'

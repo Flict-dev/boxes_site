@@ -7,7 +7,6 @@ from rest_framework.viewsets import ViewSet
 from django.core.exceptions import ObjectDoesNotExist
 from carts.models import Cart, CartItem
 from carts.serializers import CartSerializer, CartItemSerializer
-from items.serializers import ItemSerializer
 
 
 class CartViewSet(ViewSet):
@@ -52,28 +51,16 @@ class CartItemViewSet(viewsets.GenericViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
 
     def create(self, request):
-        cart_item = CartItemSerializer(data=request.data)
+        cart_item = CartItemSerializer(data=request.data, context={'request': request})
         if cart_item.is_valid():
-            try:
-                cart, param = Cart.objects.get_or_create(
-                    user=request.user,
-                    order__isnull=True,
-                    defaults={"user": request.user}
-                )
-                cart_item.save()
-                new_item = CartItem.objects.get(id=cart_item.data['id'])
-                cart.items.add(new_item)
-                new_item.cart = cart
-                new_item.save()
-                return Response(cart_item.data, status=status.HTTP_201_CREATED)
-            except ObjectDoesNotExist:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+            cart_item.save()
+            return Response(cart_item.data, status=status.HTTP_201_CREATED)
         else:
             return Response(cart_item.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, pk):
         obj = self.get_obj(pk)
-        serializer = CartItemSerializer(obj, data=request.data)
+        serializer = CartItemSerializer(obj, data=request.data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -82,7 +69,7 @@ class CartItemViewSet(viewsets.GenericViewSet):
 
     def partial_update(self, request, pk):
         obj = self.get_obj(pk)
-        serializer = CartItemSerializer(obj, data=request.data, partial=True)
+        serializer = CartItemSerializer(obj, data=request.data, partial=True, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)

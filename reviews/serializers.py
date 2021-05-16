@@ -1,12 +1,28 @@
 from rest_framework import serializers
 from rest_framework.serializers import ModelSerializer
-
 from reviews.models import Reviews
+from users.serializers import UserSerializer
 
 
 class ReviewSerializer(ModelSerializer):
-    author = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    author = UserSerializer(read_only=True)
 
     class Meta:
         model = Reviews
-        fields = '__all__'
+        fields = (
+            'id',
+            'author',
+            'status',
+            'text',
+            'created_at',
+            'published_at',
+        )
+
+    def create(self, validated_data):
+        request = self.context.get('request')
+        review = Reviews(
+            author=request.user,
+            text=request.data['text'],
+        )
+        review.save()
+        return review

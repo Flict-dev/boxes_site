@@ -9,22 +9,33 @@ from items.serializers import ItemSerializer
 class CartItemSerializer(ModelSerializer):
     total_price = serializers.SerializerMethodField('_get_total_price')
     item = ItemSerializer(read_only=True)
-    item_id = serializers.PrimaryKeyRelatedField(queryset=Item.objects.all())
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, required=False)
 
     class Meta:
         model = CartItem
         fields = ('id', 'item', 'item_id', 'price', 'quantity', 'total_price')
 
     def _get_total_price(self, cart_item):
-        return cart_item.price * cart_item.quantity
+        return cart_item.price * int(cart_item.quantity)
 
     def create(self, validated_data):
+        request = self.context.get('request')
+        item = Item.objects.get(id=request.data['item'])
+        cart, param = Cart.objects.get_or_create(
+            user=request.user,
+            order__isnull=True,
+            defaults={"user": request.user}
+        )
         cart_item = CartItem(
-            item=validated_data['item_id'],
-            price=validated_data['item_id'].price,
-            quantity=validated_data['quantity'],
+            item=item,
+            price=item.price,
+            cart_id=cart.id,
+            item_id=item.id,
+            quantity=request.data['quantity'],
         )
         cart_item.save()
+        cart.items.add(item)
+        cart.save()
         return cart_item
 
 

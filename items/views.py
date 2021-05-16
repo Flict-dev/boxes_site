@@ -1,6 +1,8 @@
 from rest_framework.filters import OrderingFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import ReadOnlyModelViewSet
+
+from items.filters import ItemFilter
 from items.models import Item
 from items.serializers import ItemSerializer
 from django_filters.rest_framework import DjangoFilterBackend
@@ -19,3 +21,4 @@ class ItemViewSet(ReadOnlyModelViewSet):
     filter_backends = [OrderingFilter, DjangoFilterBackend]
     ordering = ['weight', 'price']
     filterset_fields = ['weight', 'price']
+    filterset_class = ItemFilter

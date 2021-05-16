@@ -10,6 +10,7 @@ api_patterns = [
     path('users/', include('users.urls')),
     path('reviews/', include('reviews.urls')),
     path('carts/', include('carts.urls')),
+    path('orders/', include('orders.urls')),
     path('docs/', schema_view.with_ui('swagger', cache_timeout=0))
 ]
 

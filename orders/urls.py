@@ -1,9 +1,8 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from reviews.views import ReviewViewSet
+from orders.views import OrderViewSet
 
-app_name = 'review'
 router = DefaultRouter()
-router.register('', ReviewViewSet, basename='reviews')
+router.register('', OrderViewSet, basename='order')
 urlpatterns = router.urls
