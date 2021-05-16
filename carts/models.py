@@ -19,7 +19,7 @@ class CartItem(models.Model):
 
 
 class Cart(models.Model):
-    items = models.ManyToManyField(Item, verbose_name='продуткы', related_name='cart_items', through=CartItem)
+    items = models.ManyToManyField(Item, verbose_name='продуткы', related_name='carts', through=CartItem)
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='владелец')
 
     class Meta:
