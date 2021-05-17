@@ -10,7 +10,7 @@ from carts.serializers import CartSerializer, CartItemSerializer
 
 
 class CartViewSet(ViewSet):
-    def retrieve(self, request, pk=None):
+    def retrieve(self, request):
         cart, param = Cart.objects.get_or_create(user=request.user, order__isnull=True, defaults={"user": request.user})
         serializer = CartSerializer(cart)
         return Response(serializer.data)
