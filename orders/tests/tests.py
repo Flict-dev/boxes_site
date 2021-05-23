@@ -81,8 +81,8 @@ class OrderViewSetListTestCase(APITestCase):
                     "status": f"{order.status}",
                     "total_cost": float(self.total_cost),
                     "address": f"{order.address}",
-                    "delivery_at": f"{order.delivery_at}",
-                    "created_at": f"{order.created_at}"
+                    "delivery_at": f"{str(order.delivery_at)[:19]}",
+                    "created_at": f"{str(order.created_at)[:19]}"
                 }
                 for order in self.orders[:len(results)]
             ]
@@ -117,9 +117,8 @@ class OrderViewSetCreateTestCase(APITestCase):
     def test(self):
         data = {
             "address": "string",
-            "delivery_at": "2021-05-22T10:16:46.247Z"
+            "delivery_at": "2021-05-22 13:47:10.954Z"
         }
-
         self.client.force_authenticate(user=self.user)
         response = self.client.post(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -154,8 +153,8 @@ class OrderViewSetCreateTestCase(APITestCase):
                 "status": f"{order.status}",
                 "total_cost": float(self.total_cost),
                 "address": f"{order.address}",
-                "delivery_at": f"{order.delivery_at}",
-                "created_at": f"{order.created_at}"
+                "delivery_at": f"{str(order.delivery_at)[:23]}Z",
+                "created_at": f"{str(order.created_at)[:19]}"
             }
         )
 
@@ -200,7 +199,7 @@ class OrderViewSetPartialUpdateTestCase(APITestCase):
         data = {
             "status": "created",
             "address": "string",
-            "delivery_dt": "2021-05-22T13:47:10.954Z"
+            "delivery_at": "2021-05-22T13:47:10.954Z"
         }
         response = self.client.patch(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -212,7 +211,7 @@ class OrderViewSetPartialUpdateTestCase(APITestCase):
         data = {
             "status": "created",
             "address": "string",
-            "delivery_dt": "2021-05-22T13:47:10.954Z"
+            "delivery_at": "2021-05-22T13:47:10.954Z"
         }
         response = self.client.put(fail_url, data=data)
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -259,8 +258,8 @@ class OrderViewSetPartialUpdateTestCase(APITestCase):
                 "status": f"{order.status}",
                 "total_cost": float(self.total_cost),
                 "address": f"{order.address}",
-                "delivery_at": f"{order.delivery_at}",
-                "created_at": f"{order.created_at}"
+                "delivery_at": f"{str(order.delivery_at)[:19]}",
+                "created_at": f"{str(order.created_at)[:19]}"
             }
         )
 
@@ -305,7 +304,7 @@ class OrderViewSetUpdateTestCase(APITestCase):
         data = {
             "status": "created",
             "address": "string",
-            "delivery_dt": "2021-05-22T13:47:10.954Z"
+            "delivery_at": "2021-05-22T13:47:10.954Z"
         }
         response = self.client.put(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -329,7 +328,7 @@ class OrderViewSetUpdateTestCase(APITestCase):
         data = {
             "status": "created",
             "address": "string",
-            "delivery_dt": "2021-05-22T13:47:10.954Z"
+            "delivery_at": "2021-05-22T13:47:10.954Z"
         }
         response = self.client.patch(self.url, data=data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -364,8 +363,8 @@ class OrderViewSetUpdateTestCase(APITestCase):
                 "status": f"{order.status}",
                 "total_cost": float(self.total_cost),
                 "address": f"{order.address}",
-                "delivery_at": f"{order.delivery_at}",
-                "created_at": f"{order.created_at}"
+                "delivery_at": f"{str(order.delivery_at)[:19]}",
+                "created_at": f"{str(order.created_at)[:19]}"
             }
         )
 
@@ -434,7 +433,7 @@ class OrderViewSetRetrieveTestCase(APITestCase):
                 "status": f"{self.order.status}",
                 "total_cost": float(self.total_cost),
                 "address": f"{self.order.address}",
-                "delivery_at": f"{self.order.delivery_at}",
-                "created_at": f"{self.order.created_at}"
+                "delivery_at": f"{str(self.order.delivery_at)[:19]}",
+                "created_at": f"{str(self.order.created_at)[:19]}"
             }
         )
