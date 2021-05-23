@@ -3,15 +3,20 @@ from rest_framework import status, viewsets
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import ViewSet
+from rest_framework.views import APIView
 from django.core.exceptions import ObjectDoesNotExist
 from carts.models import Cart, CartItem
 from carts.serializers import CartSerializer, CartItemSerializer
 
 
-class CartViewSet(ViewSet):
-    def retrieve(self, request):
-        cart, param = Cart.objects.get_or_create(user=request.user, order__isnull=True, defaults={"user": request.user})
+class CartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            cart = Cart.objects.prefetch_related('cart_items').get(user=request.user, order__isnull=True)
+        except ObjectDoesNotExist:
+            cart = Cart.objects.create(user=request.user)
         serializer = CartSerializer(cart)
         return Response(serializer.data)
 
@@ -34,7 +39,7 @@ class CartItemViewSet(viewsets.GenericViewSet):
 
     def retrieve(self, request, pk=None):
         try:
-            obj = CartItem.objects.get(id=pk)
+            obj = CartItem.objects.select_related('item').get(id=pk)
             serializer = CartItemSerializer(obj)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except ObjectDoesNotExist:
@@ -42,8 +47,8 @@ class CartItemViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         try:
-            cart = Cart.objects.get(user=request.user, order__isnull=True)
-            queryset = CartItem.objects.filter(cart=cart)
+            cart = Cart.objects.get(order__isnull=True, user=request.user)
+            queryset = CartItem.objects.select_related('item').filter(cart=cart)
             objects = self.paginate_queryset(queryset)
             serializer = CartItemSerializer(objects, many=True)
             return self.get_paginated_response(serializer.data)

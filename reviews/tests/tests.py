@@ -1,7 +1,6 @@
 from rest_framework import status
 from rest_framework.reverse import reverse
 from rest_framework.test import APITestCase
-
 from reviews.models import Reviews
 from reviews.tests.factories import ReviewFactory
 from users.tests.factories import UserFactory
@@ -49,8 +48,7 @@ class ReviewViewSetCreateTestCse(APITestCase):
 
 class ReviewViewSetListTestCase(APITestCase):
     def setUp(self) -> None:
-        self.authors = [UserFactory() for _ in range(10)]
-        self.reviews = [ReviewFactory(author=self.authors[i], author_id=self.authors[i].id) for i in range(10)]
+        self.reviews = [ReviewFactory() for _ in range(10)]
 
     @classmethod
     def setUpTestData(cls):

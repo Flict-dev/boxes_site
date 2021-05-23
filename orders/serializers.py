@@ -3,11 +3,15 @@ from rest_framework import serializers
 from carts.models import Cart
 from carts.serializers import CartSerializer
 from orders.models import Order
+from users.serializers import UserSerializer
 
 
 class OrderSerializer(serializers.ModelSerializer):
     cart = CartSerializer(read_only=True)
     total_cost = serializers.SerializerMethodField('_get_total_cost')
+    delivery_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S")
+    created_at = serializers.DateTimeField(format="%Y-%m-%d %H:%M:%S", required=False)
+    recipient = UserSerializer(write_only=True, required=False)
 
     def _get_total_cost(self, order):
         cart = CartSerializer(order.cart)

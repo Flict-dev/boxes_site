@@ -9,9 +9,12 @@ from reviews.serializers import ReviewSerializer
 
 
 class ReviewViewSet(GenericViewSet):
+    serializer_class = ReviewSerializer
+    queryset = Reviews.objects.all()
+
     def list(self, request):
         PUBLISHED = 'published'
-        queryset = Reviews.objects.filter(status=PUBLISHED)
+        queryset = Reviews.objects.select_related('author').filter(status=PUBLISHED)
         objects = self.paginate_queryset(queryset)
         serializer = ReviewSerializer(objects, many=True)
         return self.get_paginated_response(serializer.data)

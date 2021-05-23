@@ -5,9 +5,6 @@ from users.models import User
 
 
 class Reviews(models.Model):
-    PUBLISHED = 'опубликован'
-    ON_MODERATION = 'на модерации'
-
     class StatusChoices(models.TextChoices):
         ON_MODERATION = 'на модерации'
         PUBLISHED = 'опубликован'
@@ -27,6 +24,6 @@ class Reviews(models.Model):
         return f"Отзыв номер - {self.pk}"
 
     def clean(self):
-        if self.status == self.PUBLISHED and not self.published_at and self.status != self.ON_MODERATION:
+        if self.status == self.StatusChoices.PUBLISHED and not self.published_at:
             self.published_at = timezone.now()
         super(Reviews, self).clean()

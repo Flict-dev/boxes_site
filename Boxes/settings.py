@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'debug_toolbar',
     'rest_framework',
+    'cacheops',
     'drf_yasg',
     'reviews',
     'carts',
@@ -95,7 +96,18 @@ REST_FRAMEWORK = {
     'DATE_INPUT_FORMATS': ["%d-%m-%Y"],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '1/second',
+        'user': '60/minute',
+        'orders': '1/minute'
+    },
     'EXCEPTIONS_HANDLER': 'Boxes.utils.custom_exception_handler'
 }
 
@@ -104,6 +116,21 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ORIGIN_REGEX_WHITELIST = [
     'http://localhost:3030',
 ]
+
+CACHEOPS_DEFAULTS = {
+    'timeout': 60 * 60
+}
+CACHEOPS = {
+    'auth.user': {'ops': 'get', 'timeout': 60 * 15},
+    'auth.*': {'ops': ('fetch', 'get')},
+    'auth.permission': {'ops': 'all'},
+    '*.*': {},
+}
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'

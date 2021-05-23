@@ -11,8 +11,8 @@ class Order(models.Model):
         PROCESSED = 'processed'
         CANCELLED = 'cancelled'
 
-    created_at = models.DateTimeField(auto_now=True, verbose_name='Дата создания')
-    delivery_at = models.DateTimeField(verbose_name='Дата доставки')
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    delivery_at = models.DateTimeField(verbose_name='Дата доставки', null=True)
     recipient = models.ForeignKey(get_user_model(), on_delete=models.CASCADE, verbose_name='Получатель')
     address = models.CharField(max_length=60, verbose_name='Адрес')
     cart = models.ForeignKey(Cart, on_delete=models.CASCADE, verbose_name='Корзина', related_name='order')
