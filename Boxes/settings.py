@@ -104,9 +104,9 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle'
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': '1/second',
+        'anon': '30/minute',
         'user': '60/minute',
-        'orders': '1/minute'
+        'orders': '1/day',
     },
     'EXCEPTIONS_HANDLER': 'Boxes.utils.custom_exception_handler'
 }
@@ -117,16 +117,12 @@ CORS_ORIGIN_REGEX_WHITELIST = [
     'http://localhost:3030',
 ]
 
-CACHEOPS_DEFAULTS = {
-    'timeout': 60 * 60
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
 }
-CACHEOPS = {
-    'auth.user': {'ops': 'get', 'timeout': 60 * 15},
-    'auth.*': {'ops': ('fetch', 'get')},
-    'auth.permission': {'ops': 'all'},
-    '*.*': {},
-}
-
 INTERNAL_IPS = [
     '127.0.0.1',
 ]

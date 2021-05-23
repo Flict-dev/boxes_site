@@ -14,3 +14,16 @@ class User(AbstractUser):
 
     def __str__(self):
         return f'пользоваетль {self.id}'
+
+    @property
+    def current_cart(self):
+        from carts.models import Cart
+
+        cart, _ = Cart.objects.get_or_create(
+            user=self,
+            order__isnull=True,
+            defaults={
+                "user": self
+            }
+        )
+        return cart

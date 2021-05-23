@@ -21,11 +21,7 @@ class CartItemSerializer(ModelSerializer):
     def create(self, validated_data):
         request = self.context.get('request')
         item = Item.objects.get(id=request.data['item'])
-        cart, param = Cart.objects.get_or_create(
-            user=request.user,
-            order__isnull=True,
-            defaults={"user": request.user}
-        )
+        cart = request.user.current_cart
         cart_item = CartItem(
             item=item,
             price=item.price,

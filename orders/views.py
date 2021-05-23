@@ -1,12 +1,10 @@
 from django.http import Http404
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet, ModelViewSet
-
-from carts.models import Cart
+from rest_framework.viewsets import GenericViewSet
 from orders.models import Order
 from orders.serializers import OrderSerializer
 

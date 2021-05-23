@@ -1,6 +1,8 @@
 from django.db import models
-
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from Boxes.settings import ITEM_IMAGE_DIR
+from django.core.cache import cache
 
 
 class Item(models.Model):
@@ -16,3 +18,9 @@ class Item(models.Model):
 
     def __str__(self):
         return self.title
+
+
+@receiver([post_save, post_delete], sender=Item)
+def invalidate_item_cache(sender, instance, **kwargs):
+    from items.views import ITEM_CACHE_KEY
+    cache.delete(ITEM_CACHE_KEY)

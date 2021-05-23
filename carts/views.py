@@ -1,6 +1,5 @@
 from django.http import Http404
 from rest_framework import status, viewsets
-from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -13,10 +12,7 @@ class CartAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            cart = Cart.objects.prefetch_related('cart_items').get(user=request.user, order__isnull=True)
-        except ObjectDoesNotExist:
-            cart = Cart.objects.create(user=request.user)
+        cart = request.user.current_cart
         serializer = CartSerializer(cart)
         return Response(serializer.data)
 
@@ -33,7 +29,7 @@ class CartItemViewSet(viewsets.GenericViewSet):
             raise Http404
 
     def get_queryset(self):
-        cart = get_object_or_404(Cart, user=self.request.user)
+        cart = self.request.user.current_cart
         queryset = CartItem.objects.filter(cart=cart)
         return queryset
 
@@ -47,7 +43,7 @@ class CartItemViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         try:
-            cart = Cart.objects.get(order__isnull=True, user=request.user)
+            cart = request.user.current_cart
             queryset = CartItem.objects.select_related('item').filter(cart=cart)
             objects = self.paginate_queryset(queryset)
             serializer = CartItemSerializer(objects, many=True)
