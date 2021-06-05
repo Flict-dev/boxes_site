@@ -1,4 +1,4 @@
-# boxes_site - this is my pet backend project
+# boxes_site - it's my pet backend project
 ### In this project i used django rest framework, you can see documentation on url - '/api/v1/docs/'
 ### For start you need:
 - python -m venv venv
